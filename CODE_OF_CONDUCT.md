@@ -1,49 +1,45 @@
-# Contributor Covenant Code of Conduct
+# AGATE (Antigravity Helper) - Code of Conduct
 
-## Our Pledge
+## 1. Our Commitment
 
-In the interest of fostering an open and welcoming environment, we as contributors and maintainers pledge to making participation in our project and our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
+In the interest of fostering an open, welcoming, and strictly professional engineering environment, we as contributors and project maintainers pledge to making participation in **AGATE (Antigravity Helper)** a harassment-free experience for everyone. This commitment stands absolutely regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual orientation.
 
-## Our Standards
+## 2. Professional Standards
 
-Examples of behavior that contributes to creating a positive environment include:
+Constructive participation and a healthy development culture are paramount. Examples of behavior that directly contributes to creating a positive environment include:
 
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints and experiences
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards other community members
+- Relying on welcoming and inclusive development terminology.
+- Maintaining respect for differing technical viewpoints and personal backgrounds.
+- Professionally accepting and analyzing constructive code-reviews and feedback.
+- Orienting focus strictly on what objectively benefits the AGATE ecosystem and its user base.
+- Demonstrating baseline empathy towards all community members and downstream users.
 
-Examples of unacceptable behavior by participants include:
+Examples of unacceptable and highly discouraged behavior by participants include:
 
-- The use of sexualized language or imagery and unwelcome sexual attention or advances
-- Trolling, insulting/derogatory comments, and personal or political attacks
-- Public or private harassment
-- Publishing others' private information, such as a physical or electronic address, without explicit permission
-- Other conduct which could reasonably be considered inappropriate in a professional setting
+- The use of sexualized language, imagery, or any unwelcome advances.
+- Deliberate trolling, derogatory remarks, and personal or political attacks against engineers.
+- Public or private harassment within any project-associated communication channel.
+- Doxxing, publishing private physical or electronic addresses without explicit and documented consent.
+- Any other conduct which could reasonably be considered inappropriate within a professional, enterprise-grade software engineering setting.
 
-## Our Responsibilities
+## 3. Maintenance Responsibilities
 
-Project maintainers are responsible for clarifying the standards of acceptable behavior and are expected to take appropriate and fair corrective action in response to any instances of unacceptable behavior.
+Project maintainers are strictly responsible for dictating and clarifying the boundaries of acceptable behavior. They are thoroughly expected to take appropriate, swift, and fair corrective actions in response to any verifiable instances of unacceptable behavior.
 
-Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct, or to ban temporarily or permanently any contributor for other behaviors that they deem inappropriate, threatening, offensive, or harmful.
+Project maintainers reserve the explicit right and absolute final responsibility to remove, edit, or reject comments, source-code commits, pull requests, issues, and other external contributions that fail to align with this Code of Conduct. Furthermore, they reserve the right to temporarily or permanently ban any contributor exhibiting behaviors deemed inappropriate, threatening, offensive, or harmful.
 
-## Scope
+## 4. Scope of Application
 
-This Code of Conduct applies both within project spaces and in public spaces when an individual is representing the project or its community. Examples of representing a project or community include using an official project e-mail address, posting via an official social media account, or acting as an appointed representative at an online or offline event. Representation of a project may be further defined and clarified by project maintainers.
+This Code of Conduct applies comprehensively across all AGATE project spaces. This extends into public domains whenever an individual is acting as an official representative of the project or its community. Direct examples of representation include drafting communications from an official project e-mail address, executing posts via an official social media account, or acting as an appointed technical representative at software conventions and events.
 
-## Enforcement
+## 5. Protocols for Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project team at [INSERT EMAIL ADDRESS]. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances. The project team is obligated to maintain confidentiality with regard to the reporter of an incident. Further details of specific enforcement policies may be posted separately.
+Any instances of abusive, harassing, or otherwise unacceptable behavior must be brought to the immediate attention of the project governance team. All incoming grievances will be meticulously reviewed and formally investigated. The outcome will result in a professional response deemed necessary and appropriate to the specific circumstances. 
 
-Project maintainers who do not follow or enforce the Code of Conduct in good faith may face temporary or permanent repercussions as determined by other members of the project's leadership.
+The project administration is strictly obligated to uphold absolute confidentiality regarding the reporter of an incident, shielding them from potential retaliation. 
 
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4, available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
-
-[homepage]: https://www.contributor-covenant.org
+Maintainers or administrative leaders who fail to govern or enforce the Code of Conduct in good faith may face temporary or permanent dismissal from the repository's leadership tree.
 
 ---
 
-**Note**: Please replace `[INSERT EMAIL ADDRESS]` with your actual contact email if you wish to receive reports.
+*This document establishes the cultural and communicative baseline required to interact with the AGATE architecture.*
