@@ -5,7 +5,8 @@
 # AGATE (Antigravity Helper)
 
 <p>
-  <strong>A Professional Multi-Account Management Suite and Local Proxy Layer for Google Gemini & Claude AI.</strong>
+  <strong>A Professional Multi-Account Management Suite and Local Proxy Layer for Google Gemini & Claude AI.</strong><br>
+  <em><a href="README-ID.md">Baca dalam Bahasa Indonesia</a></em>
 </p>
 
 <p>
@@ -63,19 +64,6 @@ When deeply integrating advanced AI models into continuous deployment pipelines 
 ### Cryptographic Foundation
 - Secure interconnectivity with OS hardware credential layers (macOS Keychain, Windows Credential Manager).
 - Strict AES-256-GCM payloads for all sensitive database rows.
-
----
-
-## Visual Interface
-
-<p>
-  <img src="docs/assets/screenshot-main.png" alt="AGATE Main Interface" width="100%" />
-</p>
-
-<p align="center">
-  <img src="docs/assets/screenshot-proxy.png" alt="Proxy Workflow" width="48%" />
-  <img src="docs/assets/screenshot-setting.png" alt="Configuration Settings" width="48%" />
-</p>
 
 ---
 
