@@ -1,0 +1,12 @@
+# Add files here to ignore them from prettier formatting
+/dist
+/coverage
+/.vite
+README.md
+CHANGELOG.md
+/src/routeTree.gen.ts
+.agents/
+openspec/
+.agent/
+.claude/
+.codex

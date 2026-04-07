@@ -1,0 +1,9 @@
+typer
+rich
+questionary
+pywin32; sys_platform == "win32"
+configparser
+psutil
+protobuf
+cryptography
+httpx
