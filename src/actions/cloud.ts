@@ -92,3 +92,12 @@ export function deleteCloudIdentityProfileRevision(input: {
 export function openCloudIdentityStorageFolder() {
   return ipc.client.cloud.openIdentityStorageFolder();
 }
+
+export function exportCloudAccounts(input: { accountIds?: string[]; password?: string }) {
+  return ipc.client.cloud.exportAccounts(input);
+}
+
+export function importCloudAccounts(input: { bundleJson: string; password?: string }) {
+  return ipc.client.cloud.importAccounts(input);
+}
+

@@ -69,6 +69,65 @@ export const CloudQuotaDataSchema = z.object({
   ),
 });
 
+/** Single account entry inside an export bundle (tokens are decrypted). */
+export interface CloudAccountExportEntry {
+  id: string;
+  provider: 'google' | 'anthropic';
+  email: string;
+  name?: string | null;
+  label?: string | null;
+  avatar_url?: string | null;
+  token: CloudTokenData;
+  quota?: CloudQuotaData;
+  device_profile?: DeviceProfile;
+  device_history?: DeviceProfileVersion[];
+  created_at: number;
+  last_used: number;
+}
+
+/** Top-level structure of an AGATE export file. */
+export interface CloudAccountExportBundle {
+  /** Format version — current: "1.0" */
+  version: string;
+  exported_at: string;
+  /** Whether the bundle payload is AES-256-GCM encrypted with a user password. */
+  encrypted: boolean;
+  /**
+   * When `encrypted` is false: raw JSON string of `CloudAccountExportEntry[]`.
+   * When `encrypted` is true: AES-256-GCM ciphertext in "iv:authTag:ciphertext" hex format.
+   */
+  payload: string;
+}
+
+export const CloudAccountExportEntrySchema = z.object({
+  id: z.string(),
+  provider: z.enum(['google', 'anthropic']),
+  email: z.string(),
+  name: z.string().optional().nullable(),
+  label: z.string().optional().nullable(),
+  avatar_url: z.string().optional().nullable(),
+  token: CloudTokenDataSchema,
+  quota: CloudQuotaDataSchema.optional(),
+  device_profile: z
+    .object({
+      machineId: z.string(),
+      macMachineId: z.string(),
+      devDeviceId: z.string(),
+      sqmId: z.string(),
+    })
+    .optional(),
+  device_history: z.array(z.any()).optional(),
+  created_at: z.number(),
+  last_used: z.number(),
+});
+
+export const CloudAccountExportBundleSchema = z.object({
+  version: z.string(),
+  exported_at: z.string(),
+  encrypted: z.boolean(),
+  payload: z.string(),
+});
+
 export const CloudAccountSchema = z.object({
   id: z.string(),
   provider: z.enum(['google', 'anthropic']),

@@ -357,7 +357,40 @@ i18n
               clear: 'Clear Selection',
               confirmDelete: 'Are you sure you want to delete {{count}} accounts?',
             },
+            export: {
+              button: 'Export',
+              dialogTitle: 'Export Accounts',
+              dialogDesc:
+                'Export your accounts to a JSON file that can be imported on another device. No Google re-login needed.',
+              warning:
+                '⚠️ This file contains sensitive tokens (refresh_token). Keep it secure and do not share it.',
+              passwordLabel: 'Password (optional)',
+              passwordPlaceholder: 'Enter password to encrypt the file…',
+              passwordHint:
+                'If you set a password, you will need to enter it when importing on the other device.',
+              confirm: 'Export',
+              successTitle: 'Export Successful',
+              successDesc: '{{count}} account(s) exported',
+              errorTitle: 'Export Failed',
+              selectInfo: 'Exporting {{count}} selected account(s)',
+              selectAll: 'Exporting all accounts ({{count}} total)',
+            },
+            import: {
+              button: 'Import',
+              dialogTitle: 'Import Accounts',
+              dialogDesc:
+                'Select an AGATE export file (.json) to import accounts into this device.',
+              passwordLabel: 'Password',
+              passwordPlaceholder: 'Enter file password if it was exported with one…',
+              selectFile: 'Select Export File',
+              fileSelected: 'Selected: {{name}}',
+              confirm: 'Import',
+              successTitle: 'Import Successful',
+              successDesc: 'Imported {{imported}} account(s), {{skipped}} skipped.',
+              errorTitle: 'Import Failed',
+            },
           },
+
           proxy: {
             title: 'API Proxy',
             description: 'Manage the local API proxy service.',
@@ -740,7 +773,36 @@ i18n
               clear: '取消选择',
               confirmDelete: '确定要删除选中的 {{count}} 个账号吗？',
             },
+            export: {
+              button: '导出',
+              dialogTitle: '导出账号',
+              dialogDesc: '将账号导出为 JSON 文件，可在其他设备上导入，无需重新登录 Google。',
+              warning: '⚠️ 此文件包含敏感 token（refresh_token），请妥善保管，切勿分享给他人。',
+              passwordLabel: '密码（可选）',
+              passwordPlaceholder: '设置密码以加密文件…',
+              passwordHint: '若设置了密码，在其他设备导入时需要输入相同密码。',
+              confirm: '导出',
+              successTitle: '导出成功',
+              successDesc: '已导出 {{count}} 个账号',
+              errorTitle: '导出失败',
+              selectInfo: '正在导出已选中的 {{count}} 个账号',
+              selectAll: '正在导出全部账号（共 {{count}} 个）',
+            },
+            import: {
+              button: '导入',
+              dialogTitle: '导入账号',
+              dialogDesc: '选择一个 AGATE 导出文件（.json）将账号导入到此设备。',
+              passwordLabel: '密码',
+              passwordPlaceholder: '若导出时设置了密码，请在此输入…',
+              selectFile: '选择导出文件',
+              fileSelected: '已选择：{{name}}',
+              confirm: '导入',
+              successTitle: '导入成功',
+              successDesc: '已导入 {{imported}} 个账号，跳过 {{skipped}} 个。',
+              errorTitle: '导入失败',
+            },
           },
+
           proxy: {
             title: 'API 反代',
             description: '管理本地 API 代理服务。',
@@ -1127,7 +1189,40 @@ i18n
               clear: 'Снять выделение',
               confirmDelete: 'Вы уверены, что хотите удалить {{count}} аккаунтов?',
             },
+            export: {
+              button: 'Экспорт',
+              dialogTitle: 'Экспорт аккаунтов',
+              dialogDesc:
+                'Экспортируйте аккаунты в JSON-файл, который можно импортировать на другом устройстве без повторного входа через Google.',
+              warning:
+                '⚠️ Файл содержит конфиденциальные токены (refresh_token). Храните его в безопасности и не передавайте третьим лицам.',
+              passwordLabel: 'Пароль (необязательно)',
+              passwordPlaceholder: 'Введите пароль для шифрования файла…',
+              passwordHint:
+                'Если вы установите пароль, его нужно будет ввести при импорте на другом устройстве.',
+              confirm: 'Экспорт',
+              successTitle: 'Экспорт выполнен',
+              successDesc: 'Экспортировано аккаунтов: {{count}}',
+              errorTitle: 'Ошибка экспорта',
+              selectInfo: 'Экспортируется выбранных аккаунтов: {{count}}',
+              selectAll: 'Экспорт всех аккаунтов (всего: {{count}})',
+            },
+            import: {
+              button: 'Импорт',
+              dialogTitle: 'Импорт аккаунтов',
+              dialogDesc:
+                'Выберите файл экспорта AGATE (.json) для импорта аккаунтов на данное устройство.',
+              passwordLabel: 'Пароль',
+              passwordPlaceholder: 'Введите пароль, если файл был экспортирован с паролем…',
+              selectFile: 'Выбрать файл',
+              fileSelected: 'Выбран: {{name}}',
+              confirm: 'Импортировать',
+              successTitle: 'Импорт выполнен',
+              successDesc: 'Импортировано: {{imported}}, пропущено: {{skipped}}.',
+              errorTitle: 'Ошибка импорта',
+            },
           },
+
           proxy: {
             title: 'API Прокси',
             description: 'Управление локальным прокси-сервером API.',

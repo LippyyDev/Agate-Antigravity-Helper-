@@ -138,3 +138,24 @@ export function useSyncLocalAccount() {
 
 import { startAuthFlow } from '@/actions/cloud';
 export { startAuthFlow };
+
+import { exportCloudAccounts, importCloudAccounts } from '@/actions/cloud';
+
+export function useExportAccounts() {
+  return useMutation({
+    mutationFn: exportCloudAccounts,
+  });
+}
+
+
+export function useImportAccounts() {
+  const queryClient = useQueryClient();
+
+  return useMutation<{ imported: number; skipped: number }, Error, { bundleJson: string; password?: string }>({
+    mutationFn: importCloudAccounts,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.cloudAccounts });
+    },
+  });
+}
+

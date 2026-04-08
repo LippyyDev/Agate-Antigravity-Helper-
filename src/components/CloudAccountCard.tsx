@@ -195,46 +195,36 @@ export function CloudAccountCard({
       .join(' ');
   };
 
-  const renderModelGroup = (title: string, models: [string, ModelQuotaInfo][]) => {
+  const renderModelGroup = (models: [string, ModelQuotaInfo][]) => {
     if (models.length === 0) return null;
     return (
-      <div key={title} className="space-y-1">
-        <div className="flex items-center gap-1.5 px-2 py-1">
-          <span className="text-muted-foreground/70 text-[10px] font-bold tracking-wider uppercase">
-            {title}
-          </span>
-          <div className="bg-border/50 h-px flex-1" />
-        </div>
+      <div className="grid grid-cols-2 gap-x-3 gap-y-2">
         {models.map(([modelName, info]) => (
           <div
             key={modelName}
-            className="group/item hover:bg-muted/60 hover:border-border/60 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 rounded-lg border border-transparent px-2 py-1.5 text-sm transition-all"
+            className="group/item flex flex-col gap-1 transition-all"
           >
             <span
-              className="text-muted-foreground group-hover/item:text-foreground min-w-0 truncate font-semibold"
+              className="text-muted-foreground group-hover/item:text-foreground w-full truncate text-[11px] font-semibold"
               title={modelName}
             >
               {formatModelName(modelName)}
             </span>
-            <div className="flex flex-col items-end gap-0.5">
-              <span
-                className="text-muted-foreground text-[9px] leading-none opacity-80"
-                title={getResetTimeTitle(info.resetTime)}
-              >
-                {getResetTimeLabel(info.resetTime)}
-              </span>
-              <div className="flex items-baseline gap-1">
-                <span
-                  className={`font-mono text-xs leading-none font-bold ${getQuotaColor(info.percentage)}`}
-                >
+            <div className="relative h-5 w-full overflow-hidden rounded bg-muted/40">
+              <div
+                className={`absolute left-0 top-0 h-full transition-all duration-300 ${getQuotaBarColor(info.percentage)} opacity-25`}
+                style={{ width: `${Math.max(0, Math.min(100, info.percentage))}%` }}
+              />
+              <div className="absolute inset-0 flex items-center justify-between px-1.5">
+                <span className={`font-mono text-[10px] font-bold ${getQuotaColor(info.percentage)}`}>
                   {info.percentage}%
                 </span>
-                <div className="bg-muted h-1 w-16 overflow-hidden rounded-full">
-                  <div
-                    className={`h-full rounded-full transition-all duration-300 ${getQuotaBarColor(info.percentage)}`}
-                    style={{ width: `${Math.max(0, Math.min(100, info.percentage))}%` }}
-                  />
-                </div>
+                <span
+                  className="text-foreground/70 text-[9px] font-medium"
+                  title={getResetTimeTitle(info.resetTime)}
+                >
+                  {getResetTimeLabel(info.resetTime)}
+                </span>
               </div>
             </div>
           </div>
@@ -246,7 +236,7 @@ export function CloudAccountCard({
   // Accounts with irrecoverable token decryption failures are shown in a locked state
     if (account.status === 'decryption_error') {
     return (
-      <Card className="bg-background/90 dark:bg-card/80 transform-gpu will-change-transform border border-amber-500/40 shadow-xl flex h-full flex-col overflow-hidden opacity-80">
+      <Card className="bg-background/90 dark:bg-card/80 transform-gpu will-change-transform border border-amber-500/40 flex h-full flex-col overflow-hidden opacity-80">
         <CardHeader className="relative flex flex-row items-center gap-4 space-y-0 pb-2">
           {account.avatar_url ? (
             <img
@@ -322,7 +312,7 @@ export function CloudAccountCard({
 
   return (
     <Card
-      className={`group bg-background/90 dark:bg-card/80 transform-gpu will-change-transform border border-white/20 dark:border-white/10 shadow-xl hover:shadow-2xl hover:border-primary/50 flex h-full flex-col overflow-hidden transition-all duration-300 ${isSelected ? 'ring-primary border-primary/50 ring-2' : ''}`}
+      className={`group bg-background/90 dark:bg-card/80 transform-gpu will-change-transform border border-border hover:border-primary/50 flex h-full flex-col overflow-hidden transition-all duration-300 ${isSelected ? 'ring-primary border-primary/50 ring-2' : ''}`}
     >
       <CardHeader className="relative flex flex-row items-center gap-4 space-y-0 pb-2">
         {onToggleSelection && (
@@ -358,6 +348,11 @@ export function CloudAccountCard({
                 {account.label}
               </Badge>
             )}
+            {account.status === 'rate_limited' && (
+              <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
+                {t('cloud.card.rateLimited')}
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             <CardDescription className="truncate text-xs">{account.email}</CardDescription>
@@ -379,13 +374,36 @@ export function CloudAccountCard({
             })()}
           </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer rounded-full">
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Menu</span>
+        
+        <div className="flex items-center">
+          {account.is_active ? (
+            <Button variant="ghost" size="icon" disabled className="text-green-600 opacity-100 h-8 w-8 rounded-full">
+              <Power className="h-4 w-4" />
             </Button>
-          </DropdownMenuTrigger>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onSwitch(account.id)}
+              disabled={isSwitching}
+              className="cursor-pointer h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+              title={t('cloud.card.use')}
+            >
+              {isSwitching ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Power className="h-4 w-4" />
+              )}
+            </Button>
+          )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer rounded-full">
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Menu</span>
+              </Button>
+            </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{t('cloud.card.actions')}</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => onSwitch(account.id)} disabled={isSwitching}>
@@ -464,61 +482,10 @@ export function CloudAccountCard({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </CardHeader>
 
       <CardContent className="flex-1 pb-2">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Badge
-              variant={account.status === 'rate_limited' ? 'destructive' : 'outline'}
-              className="text-xs"
-            >
-              {account.provider.toUpperCase()}
-            </Badge>
-            {account.is_active && (
-              <Badge variant="default" className="bg-green-500 text-xs hover:bg-green-600">
-                {t('cloud.card.active')}
-              </Badge>
-            )}
-            {account.status === 'rate_limited' && (
-              <span className="text-destructive text-xs font-medium">
-                {t('cloud.card.rateLimited')}
-              </span>
-            )}
-          </div>
-
-          {hasHighTier && (
-            <Badge
-              variant="secondary"
-              className="animate-pulse border-blue-500/20 bg-blue-500/10 text-[10px] text-blue-500"
-            >
-              {t('cloud.card.gemini3Ready')}
-            </Badge>
-          )}
-
-          {account.is_active ? (
-            <Button variant="ghost" size="sm" disabled className="text-green-600 opacity-100">
-              <Power className="mr-1 h-3 w-3" />
-              {t('cloud.card.active')}
-            </Button>
-          ) : (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => onSwitch(account.id)}
-              disabled={isSwitching}
-              className="cursor-pointer"
-            >
-              {isSwitching ? (
-                <RefreshCw className="h-3 w-3 animate-spin" />
-              ) : (
-                <Power className="mr-1 h-3 w-3" />
-              )}
-              {t('cloud.card.use')}
-            </Button>
-          )}
-        </div>
-
         <div className="space-y-2">
           {providerGroupingsEnabled ? (
             (() => {
@@ -571,10 +538,8 @@ export function CloudAccountCard({
               );
             })()
           ) : hasRenderableModels ? (
-            <div className="space-y-3">
-              {renderModelGroup(t('cloud.card.groupGoogleGemini'), geminiModels)}
-              <div className="pt-1" />
-              {renderModelGroup(t('cloud.card.groupAnthropicClaude'), claudeModels)}
+            <div className="pt-1">
+              {renderModelGroup([...geminiModels, ...claudeModels])}
             </div>
           ) : (
             <div className="text-muted-foreground flex flex-col items-center justify-center py-4">

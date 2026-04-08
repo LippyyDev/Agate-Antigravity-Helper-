@@ -6,12 +6,13 @@ import {
   LayoutDashboard,
   Settings,
   Network,
-  Rocket,
   ChevronLeft,
   ChevronRight,
   RefreshCw,
   Tag,
 } from 'lucide-react';
+import logoDark from '@/assets/logo-dark.jpg';
+import logoLight from '@/assets/logo-light.jpg';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -84,8 +85,9 @@ export const MainLayout: React.FC = () => {
 
           <div className={cn('flex flex-col', isCollapsed ? 'items-center p-4' : 'p-6')}>
             <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
-              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded">
-                <Rocket className="h-4 w-4" />
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-md">
+                <img src={logoLight} alt="Logo" className="hidden h-full w-full object-cover dark:block" />
+                <img src={logoDark} alt="Logo" className="block h-full w-full object-cover dark:hidden" />
               </div>
               <div
                 className={cn(

@@ -10,6 +10,8 @@ import {
   useSyncLocalAccount,
   startAuthFlow,
   useUpdateCloudAccountLabel,
+  useExportAccounts,
+  useImportAccounts,
 } from '@/hooks/useCloudAccounts';
 import { useCategories, useUpdateAccountCategory } from '@/hooks/useCategories';
 import { CloudAccountCard } from '@/components/CloudAccountCard';
@@ -35,6 +37,9 @@ import {
   Columns3,
   Search,
   Filter,
+  Upload,
+  FolderOpen,
+  Lock,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import {
@@ -81,6 +86,8 @@ export function CloudAccountList() {
   const { data: autoSwitchEnabled, isLoading: isSettingsLoading } = useAutoSwitchEnabled();
   const setAutoSwitchMutation = useSetAutoSwitchEnabled();
   const forcePollMutation = useForcePollCloudMonitor();
+  const exportMutation = useExportAccounts();
+  const importMutation = useImportAccounts();
 
   const { toast } = useToast();
   const lastCloudLoadErrorToastAt = useRef<number>(0);
@@ -147,6 +154,17 @@ export function CloudAccountList() {
   const [identityAccount, setIdentityAccount] = useState<CloudAccount | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string | null>(null);
+
+  // Export dialog state
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [exportPassword, setExportPassword] = useState('');
+
+  // Import dialog state
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importPassword, setImportPassword] = useState('');
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const importFileInputRef = useRef<HTMLInputElement>(null);
+
   const totalAccounts = accounts?.length || 0;
   const activeAccounts = accounts?.filter((account) => account.is_active).length || 0;
   const rateLimitedAccounts =
@@ -262,6 +280,68 @@ export function CloudAccountList() {
       );
     }
   }, [deleteMutation, toast, t]);
+
+  const handleExport = useCallback(() => {
+    const accountIds = selectedIds.size > 0 ? Array.from(selectedIds) : undefined;
+    exportMutation.mutate(
+      { accountIds, password: exportPassword || undefined },
+      {
+        onSuccess: (result) => {
+          const { filePath, count } = result as { filePath: string | null; count: number };
+          // User cancelled the native save dialog — do nothing
+          if (filePath === null) {
+            return;
+          }
+          toast({
+            title: t('cloud.export.successTitle'),
+            description: t('cloud.export.successDesc', { count }),
+          });
+          setIsExportDialogOpen(false);
+          setExportPassword('');
+        },
+        onError: (err) =>
+          toast({
+            title: t('cloud.export.errorTitle'),
+            description: getLocalizedErrorMessage(err, t),
+            variant: 'destructive',
+          }),
+      },
+    );
+  }, [exportMutation, exportPassword, selectedIds, toast, t]);
+
+
+  const handleImport = useCallback(() => {
+    if (!importFile) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const bundleJson = event.target?.result as string;
+      importMutation.mutate(
+        { bundleJson, password: importPassword || undefined },
+        {
+          onSuccess: (result) => {
+            toast({
+              title: t('cloud.import.successTitle'),
+              description: t('cloud.import.successDesc', {
+                imported: result.imported,
+                skipped: result.skipped,
+              }),
+            });
+            setIsImportDialogOpen(false);
+            setImportFile(null);
+            setImportPassword('');
+          },
+          onError: (err) =>
+            toast({
+              title: t('cloud.import.errorTitle'),
+              description: getLocalizedErrorMessage(err, t),
+              variant: 'destructive',
+            }),
+        },
+      );
+    };
+    reader.readAsText(importFile);
+  }, [importFile, importMutation, importPassword, toast, t]);
+
 
   const handleManageIdentity = useCallback((id: string) => {
     const target = (accounts || []).find((item) => item.id === id) || null;
@@ -596,6 +676,144 @@ export function CloudAccountList() {
           </DialogContent>
         </Dialog>
 
+        {/* Export Dialog */}
+        <Dialog
+          open={isExportDialogOpen}
+          onOpenChange={(open) => {
+            setIsExportDialogOpen(open);
+            if (!open) setExportPassword('');
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button variant="outline" className="cursor-pointer" title={t('cloud.export.button')}>
+              <Upload className="mr-2 h-4 w-4" />
+              {t('cloud.export.button')}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[480px]">
+            <DialogHeader>
+              <DialogTitle>{t('cloud.export.dialogTitle')}</DialogTitle>
+              <DialogDescription>{t('cloud.export.dialogDesc')}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              {/* Scope info */}
+              <div className="bg-muted/40 rounded-md border px-3 py-2 text-sm">
+                {selectedIds.size > 0
+                  ? t('cloud.export.selectInfo', { count: selectedIds.size })
+                  : t('cloud.export.selectAll', { count: accounts?.length ?? 0 })}
+              </div>
+              {/* Security warning */}
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+                {t('cloud.export.warning')}
+              </div>
+              {/* Password */}
+              <div className="space-y-1.5">
+                <Label htmlFor="export-password" className="flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5" />
+                  {t('cloud.export.passwordLabel')}
+                </Label>
+                <Input
+                  id="export-password"
+                  type="password"
+                  placeholder={t('cloud.export.passwordPlaceholder')}
+                  value={exportPassword}
+                  onChange={(e) => setExportPassword(e.target.value)}
+                />
+                <p className="text-muted-foreground text-xs">{t('cloud.export.passwordHint')}</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={handleExport}
+                disabled={exportMutation.isPending}
+              >
+                {exportMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Upload className="mr-2 h-4 w-4" />
+                {t('cloud.export.confirm')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog
+          open={isImportDialogOpen}
+          onOpenChange={(open) => {
+            setIsImportDialogOpen(open);
+            if (!open) {
+              setImportFile(null);
+              setImportPassword('');
+            }
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button variant="outline" className="cursor-pointer" title={t('cloud.import.button')}>
+              <FolderOpen className="mr-2 h-4 w-4" />
+              {t('cloud.import.button')}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[480px]">
+            <DialogHeader>
+              <DialogTitle>{t('cloud.import.dialogTitle')}</DialogTitle>
+              <DialogDescription>{t('cloud.import.dialogDesc')}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              {/* File picker */}
+              <div className="space-y-1.5">
+                <Label htmlFor="import-file">{t('cloud.import.selectFile')}</Label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    id="import-file"
+                    variant="outline"
+                    className="cursor-pointer"
+                    onClick={() => importFileInputRef.current?.click()}
+                    type="button"
+                  >
+                    <FolderOpen className="mr-2 h-4 w-4" />
+                    {t('cloud.import.selectFile')}
+                  </Button>
+                  {importFile && (
+                    <span className="text-muted-foreground max-w-[200px] truncate text-xs">
+                      {t('cloud.import.fileSelected', { name: importFile.name })}
+                    </span>
+                  )}
+                </div>
+                <input
+                  ref={importFileInputRef}
+                  type="file"
+                  accept=".json,application/json"
+                  className="hidden"
+                  onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+                />
+              </div>
+              {/* Password */}
+              <div className="space-y-1.5">
+                <Label htmlFor="import-password" className="flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5" />
+                  {t('cloud.import.passwordLabel')}
+                </Label>
+                <Input
+                  id="import-password"
+                  type="password"
+                  placeholder={t('cloud.import.passwordPlaceholder')}
+                  value={importPassword}
+                  onChange={(e) => setImportPassword(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={handleImport}
+                disabled={importMutation.isPending || !importFile}
+              >
+                {importMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <FolderOpen className="mr-2 h-4 w-4" />
+                {t('cloud.import.confirm')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Layout Selector */}
         <div className="ml-auto flex items-center gap-1 rounded-md border p-1">
           <TooltipProvider delayDuration={0}>
@@ -665,7 +883,7 @@ export function CloudAccountList() {
             placeholder="Search accounts..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring h-9 w-full rounded-md border py-1 pr-3 pl-9 text-sm shadow-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
+            className="border-input bg-background placeholder:text-muted-foreground focus-visible:ring-ring h-9 w-full rounded-md border py-1 pr-3 pl-9 text-sm transition-colors focus-visible:ring-1 focus-visible:outline-none"
           />
           {searchQuery && (
             <button

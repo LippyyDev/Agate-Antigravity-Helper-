@@ -105,7 +105,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
       <Card
         className={cn(
           'relative overflow-hidden transition-all duration-300',
-          'bg-background/60 dark:bg-card/30 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-xl hover:shadow-2xl hover:border-primary/50',
+          'bg-background/60 dark:bg-card/30 backdrop-blur-xl border border-border hover:border-primary/50',
           isCurrent ? 'ring-primary border-primary/50 ring-2' : 'cursor-pointer',
           (isSwitching || isDeleting) && 'pointer-events-none opacity-60',
         )}

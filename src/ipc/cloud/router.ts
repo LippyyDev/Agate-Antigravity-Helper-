@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { dialog } from 'electron';
+import fs from 'fs';
 import { os } from '@orpc/server';
 import {
   addGoogleAccount,
@@ -19,6 +21,8 @@ import {
   forcePollCloudMonitor,
   startAuthFlow,
   updateCloudAccountLabel,
+  exportCloudAccounts,
+  importCloudAccounts,
 } from './handler';
 import { CloudAccountSchema } from '../../types/cloudAccount';
 import { DeviceProfileSchema, DeviceProfilesSnapshotSchema } from '../../types/account';
@@ -193,4 +197,82 @@ export const cloudRouter = os.router({
   openIdentityStorageFolder: os.output(z.void()).handler(async () => {
     await openCloudIdentityStorageFolder();
   }),
+
+  exportAccounts: os
+    .input(
+      z.object({
+        accountIds: z.array(z.string()).optional(),
+        password: z.string().optional(),
+      }),
+    )
+    .output(
+      z.object({
+        // null means the user cancelled the native save dialog
+        filePath: z.string().nullable(),
+        count: z.number(),
+      }),
+    )
+    .handler(async ({ input }) => {
+      const bundle = await exportCloudAccounts(input.accountIds, input.password);
+
+      // Count actual accounts in payload to surface in the success toast
+      let count = 0;
+      try {
+        const rawEntries = bundle.encrypted ? [] : (JSON.parse(bundle.payload) as unknown[]);
+        count = Array.isArray(rawEntries) ? rawEntries.length : 0;
+      } catch {
+        count = 0;
+      }
+
+      const date = new Date().toISOString().slice(0, 10);
+      const label = input.accountIds?.length ?? 'all';
+      const defaultFileName = `agate-accounts-${label}-${date}.json`;
+
+      // Open native Windows Save-As dialog in the main process
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        title: 'Save Export File',
+        defaultPath: defaultFileName,
+        filters: [{ name: 'JSON Files', extensions: ['json'] }],
+      });
+
+      if (canceled || !filePath) {
+        return { filePath: null, count };
+      }
+
+      /**
+       * For unencrypted bundles, payload is a JSON string of CloudAccountExportEntry[].
+       * We parse it back to a real array so that JSON.stringify produces a fully
+       * indented, human-readable file instead of a single escaped string on one line.
+       * Encrypted bundles keep the payload as an opaque ciphertext string.
+       */
+      let fileContent: string;
+      if (!bundle.encrypted) {
+        const prettyBundle = {
+          version: bundle.version,
+          exported_at: bundle.exported_at,
+          encrypted: bundle.encrypted,
+          accounts: JSON.parse(bundle.payload) as unknown[],
+        };
+        fileContent = JSON.stringify(prettyBundle, null, 2);
+      } else {
+        fileContent = JSON.stringify(bundle, null, 2);
+      }
+
+      fs.writeFileSync(filePath, fileContent, 'utf-8');
+
+      return { filePath, count };
+
+    }),
+
+  importAccounts: os
+    .input(
+      z.object({
+        bundleJson: z.string(),
+        password: z.string().optional(),
+      }),
+    )
+    .output(z.object({ imported: z.number(), skipped: z.number() }))
+    .handler(async ({ input }) => {
+      return importCloudAccounts(input.bundleJson, input.password);
+    }),
 });
