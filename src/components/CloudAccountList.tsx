@@ -676,7 +676,7 @@ export function CloudAccountList() {
           </DialogContent>
         </Dialog>
 
-        {/* Export Dialog */}
+        {/* Export Dialog — opened programmatically from batch bar */}
         <Dialog
           open={isExportDialogOpen}
           onOpenChange={(open) => {
@@ -684,12 +684,6 @@ export function CloudAccountList() {
             if (!open) setExportPassword('');
           }}
         >
-          <DialogTrigger asChild>
-            <Button variant="outline" className="cursor-pointer" title={t('cloud.export.button')}>
-              <Upload className="mr-2 h-4 w-4" />
-              {t('cloud.export.button')}
-            </Button>
-          </DialogTrigger>
           <DialogContent className="sm:max-w-[480px]">
             <DialogHeader>
               <DialogTitle>{t('cloud.export.dialogTitle')}</DialogTitle>
@@ -1002,6 +996,15 @@ export function CloudAccountList() {
             <Button variant="secondary" size="sm" onClick={handleBatchRefresh}>
               <RefreshCw className="mr-2 h-3 w-3" />
               {t('cloud.batch.refresh')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsExportDialogOpen(true)}
+              title={t('cloud.export.button')}
+            >
+              <Upload className="mr-2 h-3 w-3" />
+              {t('cloud.export.button')} ({selectedIds.size})
             </Button>
             <Button variant="destructive" size="sm" onClick={handleBatchDelete}>
               <Trash2 className="mr-2 h-3 w-3" />
