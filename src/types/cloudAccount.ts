@@ -26,6 +26,8 @@ export interface CloudQuotaData {
       resetTime: string;
     }
   >;
+  /** Subscription tier name from Google's loadCodeAssist API (e.g. "Google AI Pro", "Google AI Ultra") */
+  subscription_tier?: string | null;
 }
 
 export interface CloudAccount {
@@ -67,6 +69,7 @@ export const CloudQuotaDataSchema = z.object({
       resetTime: z.string(),
     }),
   ),
+  subscription_tier: z.string().optional().nullable(),
 });
 
 /** Single account entry inside an export bundle (tokens are decrypted). */

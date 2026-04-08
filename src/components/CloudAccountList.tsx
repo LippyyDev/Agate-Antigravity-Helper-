@@ -896,6 +896,10 @@ export function CloudAccountList() {
           )}
         </div>
 
+        <div className="text-muted-foreground text-sm font-medium px-2">
+          {filteredAccounts.length} {filteredAccounts.length === 1 ? 'account' : 'accounts'} {searchQuery || selectedCategoryFilter ? 'found' : 'total'}
+        </div>
+
         {categories.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-muted-foreground flex items-center gap-1 text-xs">

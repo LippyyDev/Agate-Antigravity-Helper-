@@ -41,6 +41,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppConfig } from '@/hooks/useAppConfig';
 import { useProviderGrouping } from '@/hooks/useProviderGrouping';
 import { ProviderGroup } from '@/components/ProviderGroup';
+import { detectGooglePlanTier } from '@/utils/googlePlanDetector';
 
 interface ModelQuotaInfo {
   percentage: number;
@@ -87,6 +88,11 @@ export function CloudAccountCard({
     isProviderCollapsed,
     toggleProviderCollapse,
   } = useProviderGrouping();
+
+  // Detect Google subscription plan from quota data
+  const planInfo = account.provider === 'google'
+    ? detectGooglePlanTier(account.quota?.subscription_tier)
+    : null;
 
   // Helpers to get quota color
   const getQuotaColor = (percentage: number) => {
@@ -351,6 +357,23 @@ export function CloudAccountCard({
             {account.status === 'rate_limited' && (
               <Badge variant="destructive" className="h-5 px-1.5 text-[10px]">
                 {t('cloud.card.rateLimited')}
+              </Badge>
+            )}
+            {/* Google subscription plan badge — shown only for Pro/Ultra */}
+            {planInfo?.tier === 'ultra' && (
+              <Badge
+                className="h-5 px-1.5 text-[10px] bg-violet-500/15 text-violet-500 border border-violet-500/30 font-semibold shadow-none"
+                title={planInfo.displayName ?? 'Google AI Ultra'}
+              >
+                Ultra
+              </Badge>
+            )}
+            {planInfo?.tier === 'pro' && (
+              <Badge
+                className="h-5 px-1.5 text-[10px] bg-blue-500/15 text-blue-500 border border-blue-500/30 font-semibold shadow-none"
+                title={planInfo.displayName ?? 'Google AI Pro'}
+              >
+                Pro
               </Badge>
             )}
           </div>

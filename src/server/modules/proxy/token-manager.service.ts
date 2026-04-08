@@ -225,7 +225,7 @@ export class TokenManagerService implements OnModuleInit {
 
       if (!effectiveProjectId) {
         try {
-          const fetchedProjectId = await GoogleAPIService.fetchProjectId(tokenData.access_token);
+          const [fetchedProjectId] = await GoogleAPIService.fetchProjectId(tokenData.access_token);
           const normalizedProjectId = normalizeProjectId(fetchedProjectId);
 
           if (normalizedProjectId) {

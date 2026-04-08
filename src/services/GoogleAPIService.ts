@@ -59,6 +59,8 @@ export interface QuotaData {
       resetTime: string;
     }
   >;
+  /** Raw tier name from Google's loadCodeAssist API (e.g. "Google AI Pro") */
+  subscription_tier?: string | null;
 }
 
 // Internal types for API parsing
@@ -69,8 +71,24 @@ interface ModelInfoRaw {
   };
 }
 
+interface Tier {
+  id?: string;
+  name?: string;
+  isDefault?: boolean;
+  quotaTier?: string;
+  slug?: string;
+}
+
+interface IneligibleTier {
+  reasonCode?: string;
+}
+
 interface LoadProjectResponse {
   cloudaicompanionProject?: string;
+  currentTier?: Tier;
+  paidTier?: Tier;
+  allowedTiers?: Tier[];
+  ineligibleTiers?: IneligibleTier[];
 }
 
 // --- Service Implementation ---
@@ -219,9 +237,18 @@ export class GoogleAPIService {
   }
 
   /**
-   * Core logic: Fetches the internal project ID needed for quota checks.
+   * Core logic: Fetches the internal project ID and subscription tier via loadCodeAssist.
+   *
+   * Multi-level fallback for tier extraction (mirrors reference implementation):
+   * 1. paidTier (Google One AI Premium etc.)
+   * 2. currentTier (if account is not ineligible)
+   * 3. allowedTiers default entry with "(Restricted)" suffix
+   *
+   * @returns [projectId, subscriptionTier]
    */
-  public static async fetchProjectId(accessToken: string): Promise<string | null> {
+  public static async fetchProjectId(
+    accessToken: string,
+  ): Promise<[string | null, string | null]> {
     const body = {
       metadata: { ideType: 'ANTIGRAVITY' },
     };
@@ -242,24 +269,56 @@ export class GoogleAPIService {
 
         if (response.ok) {
           const data = (await response.json()) as LoadProjectResponse;
-          if (data.cloudaicompanionProject) {
-            return data.cloudaicompanionProject;
+          const projectId = data.cloudaicompanionProject ?? null;
+
+          // --- Tier extraction (multi-level fallback) ---
+          let subscriptionTier: string | null = null;
+
+          // 1. Paid tier takes priority
+          if (data.paidTier) {
+            subscriptionTier = data.paidTier.name ?? data.paidTier.id ?? null;
           }
+
+          const isIneligible =
+            Array.isArray(data.ineligibleTiers) && data.ineligibleTiers.length > 0;
+
+          if (!subscriptionTier) {
+            if (!isIneligible && data.currentTier) {
+              // 2. Current tier (only when not ineligible)
+              subscriptionTier = data.currentTier.name ?? data.currentTier.id ?? null;
+            } else if (isIneligible && Array.isArray(data.allowedTiers)) {
+              // 3. Default allowed tier with Restricted suffix
+              const defaultTier = data.allowedTiers.find((t) => t.isDefault);
+              if (defaultTier) {
+                const label = defaultTier.name ?? defaultTier.id;
+                if (label) {
+                  subscriptionTier = `${label} (Restricted)`;
+                }
+              }
+            }
+          }
+
+          if (subscriptionTier) {
+            logger.info(`[GoogleAPIService] Subscription tier identified: ${subscriptionTier}`);
+          }
+
+          return [projectId, subscriptionTier];
         }
       } catch (e) {
         logger.warn(`[GoogleAPIService] Failed to fetch project ID (Attempt ${i + 1}):`, e);
         await new Promise((r) => setTimeout(r, 500)); // Sleep 500ms
       }
     }
-    return null;
+    return [null, null];
   }
 
   /**
    * Core logic: Fetches detailed model quota information.
+   * Also populates subscription_tier from loadCodeAssist response.
    */
   static async fetchQuota(accessToken: string): Promise<QuotaData> {
-    // 1. Get Project ID (Critical)
-    const projectId = await this.fetchProjectId(accessToken);
+    // 1. Get Project ID + Subscription Tier (Critical)
+    const [projectId, subscriptionTier] = await this.fetchProjectId(accessToken);
 
     // 2. Build Payload
     const payload: Record<string, unknown> = {};
@@ -310,7 +369,7 @@ export class GoogleAPIService {
         }
 
         const data = (await response.json()) as { models: Record<string, ModelInfoRaw> };
-        const result: QuotaData = { models: {} };
+        const result: QuotaData = { models: {}, subscription_tier: subscriptionTier };
 
         // Parse relevant models
         for (const [name, info] of Object.entries(data.models || {})) {
