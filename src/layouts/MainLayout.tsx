@@ -66,49 +66,42 @@ export const MainLayout: React.FC = () => {
         {/* Sidebar */}
         <aside
           className={cn(
-            'bg-muted/10 group relative flex flex-col border-r transition-all duration-300 ease-in-out',
-            isCollapsed ? 'w-[70px]' : 'w-64',
+            'bg-card/40 backdrop-blur-3xl group relative flex flex-col border-r border-border/40 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] transition-all duration-300 ease-in-out',
+            isCollapsed ? 'w-[76px]' : 'w-64',
           )}
         >
           <Button
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="bg-background hover:bg-accent hover:text-accent-foreground absolute top-6 -right-3 z-10 h-6 w-6 rounded-full border opacity-0 shadow-md transition-opacity group-hover:opacity-100"
+            className="bg-background hover:bg-accent text-muted-foreground hover:text-foreground absolute top-7 -right-3 z-40 h-6 w-6 cursor-pointer rounded-full border shadow-sm opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100 hover:scale-110"
             onClick={() => setIsCollapsed(!isCollapsed)}
           >
             {isCollapsed ? (
-              <ChevronRight className="h-3 w-3" />
+              <ChevronRight className="h-3.5 w-3.5" />
             ) : (
-              <ChevronLeft className="h-3 w-3" />
+              <ChevronLeft className="h-3.5 w-3.5" />
             )}
           </Button>
 
-          <div className={cn('flex flex-col', isCollapsed ? 'items-center p-4' : 'p-6')}>
-            <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-md">
+          <div className={cn('flex flex-col mb-4', isCollapsed ? 'items-center p-5' : 'p-6 pb-2')}>
+            <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm border border-border/50 bg-background/50">
                 <img src={logoLight} alt="Logo" className="hidden h-full w-full object-cover dark:block" />
                 <img src={logoDark} alt="Logo" className="block h-full w-full object-cover dark:hidden" />
               </div>
               <div
                 className={cn(
-                  'overflow-hidden transition-all duration-300',
+                  'flex flex-col justify-center overflow-hidden transition-all duration-300',
                   isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100',
                 )}
               >
-                <h1 className="text-xl font-bold tracking-tight">Antigravity</h1>
+                <h1 className="text-lg font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent leading-tight w-full font-[Poppins]">Antigravity</h1>
+                <span className="text-[10px] font-[Poppins] font-bold text-muted-foreground tracking-wide mt-0.5 leading-none">Helper</span>
               </div>
-            </div>
-            <div
-              className={cn(
-                'text-muted-foreground mt-1 overflow-hidden text-xs whitespace-nowrap transition-all duration-300',
-                isCollapsed ? 'h-0 opacity-0' : 'h-auto opacity-100',
-              )}
-            >
-              Helper
             </div>
           </div>
 
-          <nav className="flex-1 space-y-2 px-2">
+          <nav className="flex-1 space-y-1.5 px-3">
             <TooltipProvider>
               {navItems.map((item) => {
                 const isActive = location.pathname === item.to;
@@ -120,17 +113,17 @@ export const MainLayout: React.FC = () => {
                         <Link
                           to={item.to}
                           className={cn(
-                            'mx-auto flex h-10 w-10 items-center justify-center rounded-md transition-colors',
+                            'group mx-auto flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-200',
                             isActive
-                              ? 'bg-primary text-primary-foreground'
-                              : 'hover:bg-muted text-muted-foreground hover:text-foreground',
+                              ? 'bg-primary/10 text-primary shadow-sm border border-primary/20'
+                              : 'hover:bg-secondary/50 text-muted-foreground hover:text-foreground',
                           )}
                         >
-                          <item.icon className="h-5 w-5" />
+                          <item.icon className={cn("transition-transform duration-200", isActive ? "h-5 w-5 scale-110" : "h-5 w-5 group-hover:scale-110")} />
                           <span className="sr-only">{item.label}</span>
                         </Link>
                       </TooltipTrigger>
-                      <TooltipContent side="right">{item.label}</TooltipContent>
+                      <TooltipContent side="right" className="font-medium">{item.label}</TooltipContent>
                     </Tooltip>
                   );
                 }
@@ -140,13 +133,13 @@ export const MainLayout: React.FC = () => {
                     key={item.to}
                     to={item.to}
                     className={cn(
-                      'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                      'group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 border border-transparent',
                       isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-muted text-muted-foreground hover:text-foreground',
+                        ? 'bg-primary/10 text-primary shadow-sm border-primary/20'
+                        : 'hover:bg-secondary/40 text-muted-foreground hover:text-foreground hover:border-border/30',
                     )}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon className={cn("transition-transform duration-200", isActive ? "h-[18px] w-[18px] scale-110" : "h-[18px] w-[18px] group-hover:scale-110")} />
                     {item.label}
                   </Link>
                 );
@@ -154,7 +147,7 @@ export const MainLayout: React.FC = () => {
             </TooltipProvider>
           </nav>
 
-          <div className="border-t p-2">
+          <div className="p-3 mt-auto border-t border-border/40 bg-gradient-to-t from-muted/20 to-transparent">
             <StatusBar isCollapsed={isCollapsed} />
           </div>
         </aside>

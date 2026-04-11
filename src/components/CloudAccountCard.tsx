@@ -36,7 +36,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAppConfig } from '@/hooks/useAppConfig';
 import { useProviderGrouping } from '@/hooks/useProviderGrouping';
@@ -177,9 +176,6 @@ export function CloudAccountCard({
     .filter(([name]) => name.includes('claude'))
     .sort((a, b) => b[1].percentage - a[1].percentage);
 
-  const hasHighTier = geminiModels.some(
-    ([name, info]) => name.includes('gemini-3-pro') && info.percentage > 50,
-  );
   const hasRenderableModels = geminiModels.length > 0 || claudeModels.length > 0;
 
   const formatModelName = (name: string) => {
@@ -255,11 +251,11 @@ export function CloudAccountCard({
               {account.name?.[0]?.toUpperCase() || 'A'}
             </div>
           )}
-          <div className="flex-1 overflow-hidden">
-            <CardTitle className="text-muted-foreground truncate text-base font-semibold">
-              {account.name || t('cloud.card.unknown')}
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <CardTitle className="text-muted-foreground truncate text-base font-semibold max-w-[140px]" title={account.name ?? undefined}>
+              {account.name ? (account.name.length > 16 ? `${account.name.substring(0, 16).trim()}...` : account.name) : t('cloud.card.unknown')}
             </CardTitle>
-            <CardDescription className="truncate text-xs">{account.email}</CardDescription>
+            <CardDescription className="truncate text-xs max-w-[160px]" title={account.email}>{account.email}</CardDescription>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -350,13 +346,13 @@ export function CloudAccountCard({
             {account.name?.[0]?.toUpperCase() || 'A'}
           </div>
         )}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-w-0 overflow-hidden">
           <div className="flex items-center gap-2">
-            <CardTitle className="truncate text-base font-semibold">
-              {account.name || t('cloud.card.unknown')}
+            <CardTitle className="truncate text-base font-semibold max-w-[140px]" title={account.name ?? undefined}>
+              {account.name ? (account.name.length > 16 ? `${account.name.substring(0, 16).trim()}...` : account.name) : t('cloud.card.unknown')}
             </CardTitle>
             {account.label && (
-              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20">
+              <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20 shrink-0">
                 {account.label}
               </Badge>
             )}
@@ -383,8 +379,8 @@ export function CloudAccountCard({
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-1.5">
-            <CardDescription className="truncate text-xs">{account.email}</CardDescription>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <CardDescription className="truncate text-xs max-w-[160px]" title={account.email}>{account.email}</CardDescription>
             {account.category_id && categories.length > 0 && (() => {
               const cat = categories.find((c) => c.id === account.category_id);
               if (!cat) return null;
@@ -404,10 +400,10 @@ export function CloudAccountCard({
           </div>
         </div>
         
-        <div className="flex items-center">
+        <div className="flex items-center gap-0.5 rounded-full border border-border/60 bg-secondary/30 p-0.5 shadow-sm">
           {account.is_active ? (
-            <Button variant="ghost" size="icon" disabled className="text-green-600 opacity-100 h-8 w-8 rounded-full">
-              <Power className="h-4 w-4" />
+            <Button variant="ghost" size="icon" disabled className="text-green-600 hover:bg-transparent opacity-100 h-7 w-7 rounded-full">
+              <Power className="h-3.5 w-3.5" />
             </Button>
           ) : (
             <Button
@@ -415,21 +411,23 @@ export function CloudAccountCard({
               size="icon"
               onClick={() => onSwitch(account.id)}
               disabled={isSwitching}
-              className="cursor-pointer h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+              className="cursor-pointer h-7 w-7 rounded-full text-muted-foreground hover:bg-background hover:text-foreground"
               title={t('cloud.card.use')}
             >
               {isSwitching ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Power className="h-4 w-4" />
+                <Power className="h-3.5 w-3.5" />
               )}
             </Button>
           )}
 
+          <div className="mx-0.5 h-3.5 w-[1px] bg-border/60" />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer rounded-full">
-                <MoreVertical className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-7 w-7 cursor-pointer rounded-full hover:bg-background text-muted-foreground hover:text-foreground">
+                <MoreVertical className="h-3.5 w-3.5" />
                 <span className="sr-only">Menu</span>
               </Button>
             </DropdownMenuTrigger>

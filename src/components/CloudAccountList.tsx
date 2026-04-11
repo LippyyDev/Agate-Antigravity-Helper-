@@ -582,66 +582,102 @@ export function CloudAccountList() {
         </div>
       </div>
 
-      <div className="bg-card flex flex-wrap items-center gap-2 rounded-lg border p-3">
-        <div className="bg-muted/50 flex items-center gap-2 rounded-md border px-3 py-2">
-          <div className="flex items-center gap-2">
-            <Zap
-              className={`h-4 w-4 ${autoSwitchEnabled ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground'}`}
-            />
-            <Label htmlFor="auto-switch" className="cursor-pointer text-sm font-medium">
-              {t('cloud.autoSwitch')}
-            </Label>
+      <TooltipProvider delayDuration={0}>
+        <div className="bg-card flex flex-wrap items-center justify-between gap-4 rounded-lg border p-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-muted/20 flex items-center gap-3 rounded-md border px-3 py-1.5 transition-colors hover:bg-muted/40">
+              <div className="flex items-center gap-2">
+                <Zap
+                  className={`h-4 w-4 ${autoSwitchEnabled ? 'fill-yellow-500 text-yellow-500' : 'text-muted-foreground'}`}
+                />
+                <Label htmlFor="auto-switch" className="cursor-pointer text-sm font-medium">
+                  {t('cloud.autoSwitch')}
+                </Label>
+              </div>
+              <Switch
+                id="auto-switch"
+                checked={!!autoSwitchEnabled}
+                onCheckedChange={handleToggleAutoSwitch}
+                disabled={isSettingsLoading || setAutoSwitchMutation.isPending}
+                className="data-[state=checked]:bg-yellow-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-1 rounded-md border bg-muted/10 p-1 shadow-sm">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleSelectAll}
+                    className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-foreground"
+                  >
+                    <CheckSquare
+                      className={`h-4 w-4 ${selectedIds.size > 0 && selectedIds.size === accounts?.length ? 'text-primary fill-primary/20' : ''}`}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('cloud.batch.selectAll')}</TooltipContent>
+              </Tooltip>
+
+              <div className="mx-0.5 h-4 w-[1px] bg-border/50" />
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleForcePoll}
+                    disabled={forcePollMutation.isPending}
+                    className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-foreground"
+                  >
+                    <RefreshCcw className={`h-4 w-4 ${forcePollMutation.isPending ? 'animate-spin' : ''}`} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('cloud.checkQuota')}</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleSyncLocal}
+                    disabled={syncMutation.isPending}
+                    className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-foreground"
+                  >
+                    <Download className={`h-4 w-4 ${syncMutation.isPending ? 'animate-bounce' : ''}`} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('cloud.syncFromIDE')}</TooltipContent>
+              </Tooltip>
+
+              <div className="mx-0.5 h-4 w-[1px] bg-border/50" />
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsImportDialogOpen(true)}
+                    className="h-8 w-8 cursor-pointer text-muted-foreground hover:text-foreground"
+                  >
+                    <FolderOpen className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('cloud.import.button')}</TooltipContent>
+              </Tooltip>
+            </div>
           </div>
-          <Switch
-            id="auto-switch"
-            checked={!!autoSwitchEnabled}
-            onCheckedChange={handleToggleAutoSwitch}
-            disabled={isSettingsLoading || setAutoSwitchMutation.isPending}
-          />
-        </div>
 
-        <Button
-          variant="ghost"
-          onClick={toggleSelectAll}
-          title={t('cloud.batch.selectAll')}
-          className="cursor-pointer"
-        >
-          <CheckSquare
-            className={`mr-2 h-4 w-4 ${selectedIds.size > 0 && selectedIds.size === accounts?.length ? 'text-primary fill-primary/20' : ''}`}
-          />
-          {t('cloud.batch.selectAll')}
-        </Button>
-
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleForcePoll}
-          title={t('cloud.checkQuota')}
-          disabled={forcePollMutation.isPending}
-          className="cursor-pointer"
-        >
-          <RefreshCcw className={`h-4 w-4 ${forcePollMutation.isPending ? 'animate-spin' : ''}`} />
-        </Button>
-
-        <Button
-          variant="outline"
-          onClick={handleSyncLocal}
-          disabled={syncMutation.isPending}
-          title={t('cloud.syncFromIDE')}
-          className="cursor-pointer"
-        >
-          <Download className={`mr-2 h-4 w-4 ${syncMutation.isPending ? 'animate-bounce' : ''}`} />
-          {t('cloud.syncFromIDE')}
-        </Button>
-
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="cursor-pointer">
-              <Plus className="mr-2 h-4 w-4" />
-              {t('cloud.addAccount')}
+          <div className="flex flex-wrap items-center justify-end gap-3 flex-1">
+            <Button className="cursor-pointer gap-2 h-9" onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('cloud.addAccount')}</span>
             </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>{t('cloud.authDialog.title')}</DialogTitle>
               <DialogDescription>{t('cloud.authDialog.description')}</DialogDescription>
@@ -740,12 +776,6 @@ export function CloudAccountList() {
             }
           }}
         >
-          <DialogTrigger asChild>
-            <Button variant="outline" className="cursor-pointer" title={t('cloud.import.button')}>
-              <FolderOpen className="mr-2 h-4 w-4" />
-              {t('cloud.import.button')}
-            </Button>
-          </DialogTrigger>
           <DialogContent className="sm:max-w-[480px]">
             <DialogHeader>
               <DialogTitle>{t('cloud.import.dialogTitle')}</DialogTitle>
@@ -808,11 +838,11 @@ export function CloudAccountList() {
           </DialogContent>
         </Dialog>
 
-        {/* Layout Selector */}
-        <div className="ml-auto flex items-center gap-1 rounded-md border p-1">
-          <TooltipProvider delayDuration={0}>
-            <Tooltip>
-              <TooltipTrigger asChild>
+            <div className="hidden h-6 w-[1px] bg-border sm:block"></div>
+            {/* Layout Selector */}
+            <div className="hidden items-center gap-1 rounded-md border bg-muted/10 p-1 shadow-sm sm:flex">
+              <Tooltip>
+                <TooltipTrigger asChild>
                 <Button
                   variant={gridLayout === 'auto' ? 'secondary' : 'ghost'}
                   size="icon"
@@ -862,10 +892,11 @@ export function CloudAccountList() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>{t('cloud.layout.list')}</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+              </Tooltip>
+            </div>
+          </div>
         </div>
-      </div>
+      </TooltipProvider>
 
       {/* Search & Category Filter */}
       <div className="flex flex-wrap items-center gap-2">

@@ -32,9 +32,8 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
-  --font-sans: Geist, 'Microsoft YaHei', 'Heiti SC', 'WenQuanYi Micro Hei', sans-serif;
-  --font-mono: Geist Mono, monospace;
-  --font-tomorrow: Tomorrow, sans-serif;
+  --font-sans: 'Poppins', 'Microsoft YaHei', 'Heiti SC', 'WenQuanYi Micro Hei', sans-serif;
+  --font-mono: monospace;
 
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
@@ -73,46 +72,6 @@
 }
 
 @layer base {
-  @font-face {
-    font-family: 'Geist';
-
-    src: url('../assets/fonts/geist/geist.ttf') format('truetype');
-  }
-  @font-face {
-    font-family: 'Geist Mono';
-    font-display: swap;
-
-    src: url('../assets/fonts/geist-mono/geist-mono.ttf') format('truetype');
-  }
-
-  @font-face {
-    font-family: 'Tomorrow';
-    font-weight: 400;
-    font-style: normal;
-
-    src: url('../assets/fonts/tomorrow/tomorrow-regular.ttf') format('truetype');
-  }
-  @font-face {
-    font-family: 'Tomorrow';
-    font-weight: 400;
-    font-style: italic;
-
-    src: url('../assets/fonts/tomorrow/tomorrow-italic.ttf') format('truetype');
-  }
-  @font-face {
-    font-family: 'Tomorrow';
-    font-weight: 700;
-    font-style: normal;
-
-    src: url('../assets/fonts/tomorrow/tomorrow-bold.ttf') format('truetype');
-  }
-  @font-face {
-    font-family: 'Tomorrow';
-    font-weight: 700;
-    font-style: italic;
-
-    src: url('../assets/fonts/tomorrow/tomorrow-bold-italic.ttf') format('truetype');
-  }
   body {
     letter-spacing: var(--tracking-normal);
   }
@@ -205,8 +164,8 @@
 }
 
 @theme inline {
-  --font-sans: Geist, sans-serif;
-  --font-mono: Geist Mono, monospace;
+  --font-sans: 'Poppins', sans-serif;
+  --font-mono: monospace;
   --font-serif: Georgia, serif;
   --radius: 0.5rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
@@ -306,9 +265,9 @@
   --sidebar-accent-foreground: oklch(0 0 0);
   --sidebar-border: oklch(0.94 0 0);
   --sidebar-ring: oklch(0 0 0);
-  --font-sans: Geist, sans-serif;
+  --font-sans: 'Poppins', sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: Geist Mono, monospace;
+  --font-mono: monospace;
   --shadow-color: hsl(0 0% 0%);
   --shadow-opacity: 0.18;
   --shadow-blur: 2px;
@@ -362,9 +321,9 @@
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(0.32 0 0);
   --sidebar-ring: oklch(0.72 0 0);
-  --font-sans: Geist, sans-serif;
+  --font-sans: 'Poppins', sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: Geist Mono, monospace;
+  --font-mono: monospace;
   --shadow-color: hsl(0 0% 0%);
   --shadow-opacity: 0.18;
   --shadow-blur: 2px;
