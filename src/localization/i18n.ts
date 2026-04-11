@@ -109,15 +109,6 @@ i18n
               macos_hint:
                 'macOS requires a signed app for Login Items to work. If auto-start fails, please sign the app or enable it manually in System Settings.',
             },
-            privacy: {
-              title: 'Privacy',
-              description: 'Control how your data is used to improve the application.',
-              error_reporting: 'Error Reporting',
-              error_reporting_desc:
-                'Send anonymous error reports to help us improve the app. No personal data is collected.',
-              restart_note:
-                'Changes to error reporting will take effect after restarting the application.',
-            },
             proxy: {
               title: 'Upstream Proxy',
               description: 'Configure a proxy for outgoing requests to Google/Gemini APIs.',
@@ -529,13 +520,6 @@ i18n
               auto_startup_desc: '登录时自动启动并保持在托盘里',
               macos_hint:
                 'macOS 需要应用已签名才可生效。如自启动失败，请自行签名或在系统设置中手动启用。',
-            },
-            privacy: {
-              title: '隐私',
-              description: '控制你的数据如何用于改进应用。',
-              error_reporting: '错误上报',
-              error_reporting_desc: '发送匿名错误报告以帮助我们改进应用。不收集个人数据。',
-              restart_note: '错误上报设置会在重启应用后生效。',
             },
             proxy: {
               title: '上游代理',

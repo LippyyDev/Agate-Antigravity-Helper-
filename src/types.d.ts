@@ -7,7 +7,6 @@ declare global {
 
   interface Window {
     electron: {
-      SENTRY_ENABLED: boolean;
       onGoogleAuthCode: (callback: (code: string) => void) => () => void;
       changeLanguage: (lang: string) => void;
     };

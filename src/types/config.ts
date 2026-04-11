@@ -25,8 +25,6 @@ export const AppConfigSchema = z.object({
   auto_sync: z.boolean(),
   sync_interval: z.number(), // minutes
   auto_startup: z.boolean(),
-  error_reporting_enabled: z.boolean(),
-  privacy_consent_asked: z.boolean().optional().default(false), // Optional for backward compatibility
   default_export_path: z.string().nullable().optional(), // 导出路径
   model_visibility: z.record(z.string(), z.boolean()).default({}), // Model visibility preferences
   provider_groupings_enabled: z.boolean().default(false), // Enable provider groupings UI
@@ -46,8 +44,6 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   auto_sync: false,
   sync_interval: 5,
   auto_startup: false,
-  error_reporting_enabled: true, // Default to disabled for privacy
-  privacy_consent_asked: false, // Whether the user has been asked for consent
   default_export_path: null,
   model_visibility: {}, // Model visibility preferences
   provider_groupings_enabled: false, // Enable provider groupings UI
