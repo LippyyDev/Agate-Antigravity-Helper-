@@ -3,6 +3,16 @@ import { CloudAccount } from '../types/cloudAccount';
 import { switchCloudAccount } from '../ipc/cloud/handler';
 import { logger } from '../utils/logger';
 
+/**
+ * How old quota cache must be (in seconds) before we treat it as stale and
+ * refuse to make switch decisions based on it. 10 minutes matches the
+ * CloudMonitorService poll interval (5 min) with a safety buffer.
+ */
+const QUOTA_STALE_THRESHOLD_SECS = 600; // 10 minutes
+
+/** Minimum remaining quota percentage considered "healthy". */
+const DEPLETION_THRESHOLD = 15;
+
 export class AutoSwitchService {
   /**
    * Finds the best cloud account to switch to.
@@ -14,25 +24,40 @@ export class AutoSwitchService {
    */
   static async findBestAccount(currentAccountId: string): Promise<CloudAccount | null> {
     const accounts = await CloudAccountRepo.getAccounts();
+    const now = Math.floor(Date.now() / 1000);
 
     // Filter potential candidates
     const candidates = accounts.filter((acc) => {
-      if (acc.id === currentAccountId) return false;
-      if (acc.status !== 'active') return false; // Rate limited or expired accounts are skipped
+      if (acc.id === currentAccountId) {
+        return false;
+      }
+      if (acc.status !== 'active') {
+        return false; // Rate limited or expired accounts are skipped
+      }
 
-      // Check quota
-      // We assume simple check: if any model has < 5%, we skip it.
-      // Or better: check average? NO, check critical models.
-      // For now, let's just check if quota object exists.
-      if (!acc.quota) return false; // No quota data means risky
+      // No quota data at all — skip to avoid switching to an unknown state
+      if (!acc.quota) {
+        return false;
+      }
+
+      // Stale quota cache — treat as unknown, skip
+      if (acc.quota.cached_at && now - acc.quota.cached_at > QUOTA_STALE_THRESHOLD_SECS) {
+        logger.warn(
+          `AutoSwitch: Skipping ${acc.email} — quota cache is stale ` +
+            `(${Math.round((now - acc.quota.cached_at) / 60)}m old)`,
+        );
+        return false;
+      }
 
       const models = Object.values(acc.quota.models);
-      // If any model is depleted (< 5%), skip.
-      const isDepleted = models.some((m) => m.percentage < 5);
+      // Skip if any tracked model is below the healthy threshold
+      const isDepleted = models.some((m) => m.percentage < DEPLETION_THRESHOLD);
       return !isDepleted;
     });
 
-    if (candidates.length === 0) return null;
+    if (candidates.length === 0) {
+      return null;
+    }
 
     // Sort by "Best"
     // Heuristic: Highest average quota availability
@@ -100,9 +125,23 @@ export class AutoSwitchService {
   }
 
   static isAccountDepleted(account: CloudAccount): boolean {
-    if (!account.quota) return false; // Unknown, assume fine or let fetchQuota find out
-    // Threshold = 5%
-    const THRESHOLD = 5;
-    return Object.values(account.quota.models).some((m) => m.percentage < THRESHOLD);
+    if (!account.quota) {
+      return false; // Unknown quota — assume fine, let fetchQuota decide
+    }
+
+    // Stale cache — treat as depleted so a fresh fetch is triggered
+    const now = Math.floor(Date.now() / 1000);
+    if (
+      account.quota.cached_at &&
+      now - account.quota.cached_at > QUOTA_STALE_THRESHOLD_SECS
+    ) {
+      logger.info(
+        `AutoSwitch: Treating ${account.email} as depleted — quota data is stale ` +
+          `(${Math.round((now - account.quota.cached_at) / 60)}m old, threshold ${QUOTA_STALE_THRESHOLD_SECS / 60}m)`,
+      );
+      return true;
+    }
+
+    return Object.values(account.quota.models).some((m) => m.percentage < DEPLETION_THRESHOLD);
   }
 }

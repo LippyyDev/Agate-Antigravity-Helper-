@@ -836,6 +836,21 @@ export class CloudAccountRepo {
     }
   }
 
+  /**
+   * Clears the cached quota data for a given account.
+   * Sets `quota_json` to NULL so the UI shows no quota data until a fresh
+   * fetch completes, preventing stale percentages from driving switch decisions.
+   */
+  static clearQuota(id: string): void {
+    const { raw, orm } = getCloudDb();
+    try {
+      orm.update(accounts).set({ quotaJson: null }).where(eq(accounts.id, id)).run();
+      logger.info(`Cleared stale quota cache for account ${id}`);
+    } finally {
+      raw.close();
+    }
+  }
+
   static updateLastUsed(id: string): void {
     const { raw, orm } = getCloudDb();
     try {

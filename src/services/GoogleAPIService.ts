@@ -61,6 +61,8 @@ export interface QuotaData {
   >;
   /** Raw tier name from Google's loadCodeAssist API (e.g. "Google AI Pro") */
   subscription_tier?: string | null;
+  /** Unix timestamp (seconds) when this quota data was fetched. Used for staleness detection. */
+  cached_at?: number;
 }
 
 // Internal types for API parsing
@@ -369,7 +371,12 @@ export class GoogleAPIService {
         }
 
         const data = (await response.json()) as { models: Record<string, ModelInfoRaw> };
-        const result: QuotaData = { models: {}, subscription_tier: subscriptionTier };
+        const result: QuotaData = {
+          models: {},
+          subscription_tier: subscriptionTier,
+          // Stamp fetch time so callers can detect stale cache
+          cached_at: Math.floor(Date.now() / 1000),
+        };
 
         // Parse relevant models
         for (const [name, info] of Object.entries(data.models || {})) {

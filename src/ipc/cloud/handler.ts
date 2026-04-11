@@ -209,7 +209,7 @@ export async function switchCloudAccount(accountId: string): Promise<void> {
         account.device_profile = generated;
       }
 
-      // 1. Prepare token refresh promise (start it in parallel with process exit)
+      // 1. Prepare token refresh promise (start it in parallel with quota validation)
       const tokenRefreshPromise = (async () => {
         const now = Math.floor(Date.now() / 1000);
         if (account.token.expiry_timestamp < now + 1200) { // Increased buffer to 20m
@@ -228,6 +228,51 @@ export async function switchCloudAccount(accountId: string): Promise<void> {
           }
         }
       })();
+
+      // 2. Pre-switch: clear stale quota cache and fetch fresh quota to validate
+      //    the target account is actually healthy before committing the switch.
+      try {
+        const now = Math.floor(Date.now() / 1000);
+        const isStale =
+          !account.quota?.cached_at ||
+          now - account.quota.cached_at > 300; // 5 min staleness threshold
+
+        if (isStale) {
+          logger.info(
+            `Switch: Quota cache for ${account.email} is stale or missing — clearing and fetching fresh data...`,
+          );
+          CloudAccountRepo.clearQuota(account.id);
+
+          // Wait for token to be ready before using it for quota check
+          await tokenRefreshPromise;
+
+          const freshQuota = await GoogleAPIService.fetchQuota(account.token.access_token);
+          account.quota = freshQuota;
+          await CloudAccountRepo.updateQuota(account.id, freshQuota);
+
+          // Abort switch early if the freshly-fetched quota is already exhausted
+          const isExhausted = Object.values(freshQuota.models).some((m) => m.percentage < 15);
+          if (isExhausted) {
+            const depleted = Object.entries(freshQuota.models)
+              .filter(([, m]) => m.percentage < 15)
+              .map(([name, m]) => `${name}: ${m.percentage}%`)
+              .join(', ');
+            throw new Error(
+              `Target account ${account.email} has insufficient quota: ${depleted}. Switch aborted.`,
+            );
+          }
+
+          logger.info(`Switch: Fresh quota validated for ${account.email} — proceeding.`);
+        }
+      } catch (quotaErr: any) {
+        // Re-throw quota exhaustion errors; log and continue for transient failures
+        if (quotaErr.message?.includes('insufficient quota')) {
+          throw quotaErr;
+        }
+        logger.warn(
+          `Switch: Could not validate quota for ${account.email} (non-critical, continuing): ${quotaErr.message}`,
+        );
+      }
 
       await executeSwitchFlow({
         scope: 'cloud',

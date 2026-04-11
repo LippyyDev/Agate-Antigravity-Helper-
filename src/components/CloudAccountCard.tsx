@@ -318,7 +318,13 @@ export function CloudAccountCard({
 
   return (
     <Card
-      className={`group bg-background/90 dark:bg-card/80 transform-gpu will-change-transform border border-border hover:border-primary/50 flex h-full flex-col overflow-hidden transition-all duration-300 ${isSelected ? 'ring-primary border-primary/50 ring-2' : ''}`}
+      className={`group bg-background/90 dark:bg-card/80 transform-gpu will-change-transform border flex h-full flex-col overflow-hidden transition-all duration-300 ${
+        isSelected
+          ? 'ring-primary border-primary/50 ring-2'
+          : account.is_active
+          ? 'border-green-500 shadow-[0_0_15px_-3px_rgba(34,197,94,0.4)] ring-1 ring-green-500/50 dark:shadow-[0_0_15px_-3px_rgba(34,197,94,0.2)]'
+          : 'border-border hover:border-primary/50'
+      }`}
     >
       <CardHeader className="relative flex flex-row items-center gap-4 space-y-0 pb-2">
         {onToggleSelection && (

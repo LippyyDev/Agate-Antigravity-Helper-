@@ -3,6 +3,12 @@ import { GoogleAPIService } from './GoogleAPIService';
 import { AutoSwitchService } from './AutoSwitchService';
 import { logger } from '../utils/logger';
 
+/**
+ * Max age (seconds) of cached quota data before it is cleared and re-fetched.
+ * Should be <= CloudMonitorService.POLL_INTERVAL to ensure fresh data on every poll.
+ */
+const QUOTA_STALE_THRESHOLD_SECS = 600; // 10 minutes
+
 export class CloudMonitorService {
   private static intervalId: NodeJS.Timeout | null = null;
   private static POLL_INTERVAL = 1000 * 60 * 5; // 5 minutes
@@ -115,12 +121,26 @@ export class CloudMonitorService {
             accessToken = newToken.access_token;
           }
 
-          // 2. Fetch Quota
+          // 2. Auto-clear stale quota cache before fetching fresh data.
+          //    This ensures the UI never displays quota data that is too old
+          //    while the fresh fetch is in progress.
+          if (
+            account.quota?.cached_at &&
+            now - account.quota.cached_at > QUOTA_STALE_THRESHOLD_SECS
+          ) {
+            logger.info(
+              `Monitor: Clearing stale quota cache for ${account.email} ` +
+                `(${Math.round((now - account.quota.cached_at) / 60)}m old)`,
+            );
+            await CloudAccountRepo.clearQuota(account.id);
+          }
+
+          // 3. Fetch Quota
           // We delay slightly between requests to act human/avoid spike
           await new Promise((r) => setTimeout(r, 1000));
           const quota = await GoogleAPIService.fetchQuota(accessToken);
 
-          // 3. Update DB
+          // 4. Update DB
           await CloudAccountRepo.updateQuota(account.id, quota);
           await CloudAccountRepo.updateLastUsed(account.id);
         } catch (error) {

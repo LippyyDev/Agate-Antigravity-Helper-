@@ -28,6 +28,8 @@ export interface CloudQuotaData {
   >;
   /** Subscription tier name from Google's loadCodeAssist API (e.g. "Google AI Pro", "Google AI Ultra") */
   subscription_tier?: string | null;
+  /** Unix timestamp (seconds) when this quota data was fetched. Used for staleness detection. */
+  cached_at?: number;
 }
 
 export interface CloudAccount {
@@ -70,6 +72,7 @@ export const CloudQuotaDataSchema = z.object({
     }),
   ),
   subscription_tier: z.string().optional().nullable(),
+  cached_at: z.number().optional(),
 });
 
 /** Single account entry inside an export bundle (tokens are decrypted). */
